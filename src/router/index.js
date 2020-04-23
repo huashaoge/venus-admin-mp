@@ -85,6 +85,32 @@ export const constantRoutes = [
  * the routes that need to be dynamically loaded based on user roles
  */
 export const asyncRoutes = [
+  {
+    path: '/admin',
+    component: Layout,
+    redirect: '/admin/list',
+    meta: { title: '用户管理', icon: 'people', roles: ['admin', 'editor'] },
+    children: [
+      {
+        name: 'adminCreate',
+        path: '/admin/create',
+        component: () => import('@/views/system/admin/create'),
+        meta: { title: '创建用户', icon: 'edit', roles: ['admin'] }
+      },
+      {
+        name: 'adminEdit',
+        path: '/admin/edit/:id',
+        component: () => import('@/views/system/admin/edit'),
+        meta: { title: '编辑用户', icon: 'edit', roles: ['admin'], activeMenu: '/admin/list' }
+      },
+      {
+        name: 'adminList',
+        path: '/admin/list',
+        component: () => import('@/views/system/admin/list'),
+        meta: { title: '用户列表', icon: 'list', roles: ['admin', 'editor'] }
+      }
+    ]
+  },
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
 ]
