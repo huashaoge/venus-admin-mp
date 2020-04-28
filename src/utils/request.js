@@ -46,17 +46,12 @@ service.interceptors.response.use(
    * You can also judge the status by HTTP Status Code
    */
   response => {
-    const res = response.data
-
-    // if the custom code is not 20000, it is judged as an error.
-    if (res.code !== 20000) {
-      Message({
-        message: res.message || '请求失败',
-        type: 'error',
-        duration: 5 * 1000
-      })
-
+    if (response.data.code === 20000) {
+      return Promise.resolve(response.data)
+    } else {
+      const res = response.data
       // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
+      // 暂时不进入 此方法为后端都返回 http 200 通过自定义code判断 但是oauth有效判断抓不到异常暂时没有自定义异常
       if (res.code === 50008 || res.code === 50012 || res.code === 50014) {
         // to re-login
         MessageBox.confirm('访问令牌已过期，是否重新登录', '确认登出', {
@@ -68,20 +63,49 @@ service.interceptors.response.use(
             location.reload()
           })
         })
+      } else {
+        // 使用Promise.reject 响应
+        Message({
+          message: response.data.message || '请求失败',
+          type: 'error',
+          duration: 5 * 1000
+        })
+        return Promise.reject(response.data)
       }
-      return Promise.reject(new Error(res.message || 'Error'))
-    } else {
-      return res
     }
   },
   error => {
-    console.log('err' + error) // for debug
-    Message({
-      message: error.message,
-      type: 'error',
-      duration: 5 * 1000
-    })
-    return Promise.reject(error)
+    console.log({ error }) // for debug
+    let message = ''
+    if (error && error.response) {
+      switch (error.response.status) {
+        case 401:
+          location.reload()
+          return
+        case 403:
+          message = error.response.data.path + ',' + error.response.data.message
+          break
+        case 502:
+          message = '服务器连接失败'
+          break
+        default:
+          message = error.response.data.message ? error.response.data.message : '服务器错误'
+          break
+      }
+      Message({
+        message: message || '请求失败',
+        type: 'error',
+        duration: 5 * 1000
+      })
+      return Promise.reject(error)
+    } else {
+      Message({
+        message: message || '连接服务器失败',
+        type: 'error',
+        duration: 5 * 1000
+      })
+      return Promise.reject(error)
+    }
   }
 )
 

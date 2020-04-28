@@ -10,15 +10,16 @@ export function login(data) {
 
 export function getInfo(token) {
   return request({
-    url: '/info',
+    url: '/current/user',
     method: 'get',
     params: { token }
   })
 }
 
-export function logout() {
+export function logout(token) {
   return request({
-    url: '/user/logout',
-    method: 'post'
+    url: '/logout/token',
+    method: 'post',
+    data: { token: token }
   })
 }
