@@ -6,7 +6,6 @@ Vue.use(Router)
 /* Layout */
 import Layout from '@/layout'
 
-/* Router Modules */
 /**
  * Note: sub-menu only appear when route children.length >= 1
  * Detail see: https://panjiachen.github.io/vue-element-admin-site/guide/essentials/router-and-nav.html
@@ -30,8 +29,7 @@ import Layout from '@/layout'
 
 /**
  * constantRoutes
- * a base page that does not have permission requirements
- * all roles can be accessed
+ * 初始化默认的静态路由
  */
 export const constantRoutes = [
   {
@@ -40,7 +38,7 @@ export const constantRoutes = [
     hidden: true,
     children: [
       {
-        path: '/redirect/:path*',
+        path: '/redirect/:path(.*)',
         component: () => import('@/views/redirect/index')
       }
     ]
@@ -84,36 +82,6 @@ export const constantRoutes = [
  * asyncRoutes
  * the routes that need to be dynamically loaded based on user roles
  */
-export const asyncRoutes = [
-  {
-    path: '/admin',
-    component: Layout,
-    redirect: '/admin/list',
-    meta: { title: '用户管理', icon: 'people', roles: ['admin', 'editor'] },
-    children: [
-      {
-        name: 'adminCreate',
-        path: '/admin/create',
-        component: () => import('@/views/system/admin/create'),
-        meta: { title: '创建用户', icon: 'edit', roles: ['admin'] }
-      },
-      {
-        name: 'adminEdit',
-        path: '/admin/edit/:id',
-        component: () => import('@/views/system/admin/edit'),
-        meta: { title: '编辑用户', icon: 'edit', roles: ['admin'], activeMenu: '/admin/list' }
-      },
-      {
-        name: 'adminList',
-        path: '/admin/list',
-        component: () => import('@/views/system/admin/list'),
-        meta: { title: '用户列表', icon: 'list', roles: ['admin', 'editor'] }
-      }
-    ]
-  },
-  // 404 page must be placed at the end !!!
-  { path: '*', redirect: '/404', hidden: true }
-]
 
 const createRouter = () => new Router({
   // mode: 'history', // require service support

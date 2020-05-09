@@ -1,30 +1,50 @@
-import { login, logout, getInfo } from '@/api/user'
+import { login, logout, getInfo, getCurrentUserMenu } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import router, { resetRouter } from '@/router'
 
 const state = {
   token: getToken(),
-  name: '',
+  userName: '',
+  userId: '',
+  nickName: '',
   avatar: '',
-  introduction: '',
-  roles: []
+  access: [],
+  mobile: '',
+  email: '',
+  menus: [],
+  hasGetInfo: false
 }
 
 const mutations = {
   SET_TOKEN: (state, token) => {
     state.token = token
   },
-  SET_INTRODUCTION: (state, introduction) => {
-    state.introduction = introduction
+  SET_HASGETINFO(state, status) {
+    state.hasGetInfo = status
+  },
+  SET_ACCESS: (state, access) => {
+    state.access = access
   },
   SET_NAME: (state, name) => {
     state.name = name
   },
+  SET_NICKNAME: (state, nickName) => {
+    state.nickName = nickName
+  },
+  SET_USERID: (state, id) => {
+    state.userId = id
+  },
   SET_AVATAR: (state, avatar) => {
     state.avatar = avatar
   },
-  SET_ROLES: (state, roles) => {
-    state.roles = roles
+  SET_USERMENUS(state, menus) {
+    state.menus = menus
+  },
+  SET_MOBILE(state, mobile) {
+    state.mobile = mobile
+  },
+  SET_EMAIL(state, email) {
+    state.email = email
   }
 }
 
@@ -47,25 +67,37 @@ const actions = {
   // get user info
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
-      getInfo(state.token).then(response => {
-        const { data } = response
-
-        if (!data) {
-          reject('Verification failed, please Login again.')
+      // 获取用户信息提交到store
+      getInfo(state.token).then(res => {
+        if (res.code === 20000) {
+          commit('SET_AVATAR', res.data.avatar)
+          commit('SET_NAME', res.data.userName)
+          commit('SET_NICKNAME', res.data.nickName)
+          commit('SET_USERID', res.data.userId)
+          commit('SET_EMAIL', res.data.email)
+          commit('SET_MOBILE', res.data.mobile)
+          const access = []
+          if (res.data.authorities) {
+            res.data.authorities.map(item => {
+              if (item.authority) {
+                access.push(item.authority)
+              }
+            })
+          }
+          // ACCESS 应该没必要 后续处理
+          commit('SET_ACCESS', access)
+          // 用于判断需不需要初始或重新调用用户信息
+          commit('SET_HASGETINFO', true)
+          getCurrentUserMenu().then(res => {
+            if (res.code === 20000) {
+              // 将用户可用的权限目录缓存
+              commit('SET_USERMENUS', res.data)
+              resolve(state)
+            }
+          }).catch(err => {
+            reject(err)
+          })
         }
-
-        const { roles, name, avatar, introduction } = data
-
-        // roles must be a non-empty array
-        if (!roles || roles.length <= 0) {
-          reject('getInfo: roles must be a non-null array!')
-        }
-
-        commit('SET_ROLES', roles)
-        commit('SET_NAME', name)
-        commit('SET_AVATAR', avatar)
-        commit('SET_INTRODUCTION', introduction)
-        resolve(data)
       }).catch(error => {
         reject(error)
       })
@@ -77,7 +109,8 @@ const actions = {
     return new Promise((resolve, reject) => {
       logout(state.token).then(() => {
         commit('SET_TOKEN', '')
-        commit('SET_ROLES', [])
+        commit('SET_USERMENUS', [])
+        commit('SET_HASGETINFO', false)
         removeToken()
         resetRouter()
         resolve()
@@ -91,7 +124,8 @@ const actions = {
   resetToken({ commit }) {
     return new Promise(resolve => {
       commit('SET_TOKEN', '')
-      commit('SET_ROLES', [])
+      commit('SET_USERMENUS', [])
+      commit('SET_HASGETINFO', false)
       removeToken()
       resolve()
     })

@@ -1,5 +1,6 @@
 import request from '@/utils/request'
 
+/* 登录获取token信息 */
 export function login(data) {
   return request({
     url: '/login/token',
@@ -8,11 +9,19 @@ export function login(data) {
   })
 }
 
+/* 获取用户信息，主要获取用户的基础信息*/
 export function getInfo(token) {
   return request({
     url: '/current/user',
     method: 'get',
     params: { token }
+  })
+}
+/* 获取用户有权限的菜单目录*/
+export function getCurrentUserMenu() {
+  return request({
+    url: '/current/user/menus',
+    method: 'get'
   })
 }
 
