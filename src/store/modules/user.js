@@ -84,7 +84,6 @@ const actions = {
               }
             })
           }
-          // ACCESS 应该没必要 后续处理
           commit('SET_ACCESS', access)
           // 用于判断需不需要初始或重新调用用户信息
           commit('SET_HASGETINFO', true)

@@ -36,6 +36,15 @@ Vue.use(Element, {
   size: Cookies.get('size') || 'medium' // set element-ui default size
 })
 
+Vue.prototype.hasAuthority = function(authorities) {
+  if (!authorities) {
+    return false
+  }
+  return authorities.split(',').some(item => {
+    return store.state.user.access.includes('ACTION_' + item)
+  })
+}
+
 // register global utility filters
 Object.keys(filters).forEach(key => {
   Vue.filter(key, filters[key])
