@@ -115,7 +115,7 @@ export const listToTree = (array, startPid, currentDept, opt) => {
   let child = []
   if (array && array.length > 0) {
     child = array.map(item => {
-      if (typeof item[opt.parentKey] !== 'undefined' && item[opt.parentKey] === startPid) {
+      if (typeof item[opt.parentKey] !== 'undefined' && +item[opt.parentKey] === +startPid) {
         // 递归循环出子节点
         const nextChild = listToTree(array, item[opt.primaryKey], currentDept + 1, opt)
         // 节点信息保存
