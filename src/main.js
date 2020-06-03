@@ -9,6 +9,9 @@ import './styles/element-variables.scss'
 
 import '@/styles/index.scss' // global css
 
+import '@riophae/vue-treeselect/dist/vue-treeselect.css' // 样式文件
+import Treeselect from '@riophae/vue-treeselect'
+
 import App from './App'
 import store from './store'
 import router from './router'
@@ -35,6 +38,9 @@ if (process.env.NODE_ENV === 'production') {
 Vue.use(Element, {
   size: Cookies.get('size') || 'medium' // set element-ui default size
 })
+
+// 注册组件
+Vue.component('treeselect', Treeselect)
 
 Vue.prototype.hasAuthority = function(authorities) {
   if (!authorities) {

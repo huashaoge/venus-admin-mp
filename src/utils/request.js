@@ -8,15 +8,20 @@ import { getToken } from '@/utils/auth'
 const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
   withCredentials: true, // send cookies when cross-domain requests
-  timeout: 5000 // request timeout
+  timeout: 5000, // request timeout
+  type: 'form' // 控制form提交或者json数据提交 默认为form提交
 })
 
 // request interceptor
 service.interceptors.request.use(
   config => {
     // do something before request is sent
+    let data = { ...config.data }
+    if (config.type === 'form') {
+      data = qs.stringify(data)
+    }
     config.method === 'post'
-      ? config.data = qs.stringify({ ...config.data })
+      ? config.data = data
       : config.params = { ...config.params }
     if (store.getters.token) {
       // let each request carry token

@@ -31,23 +31,46 @@
         fixed="right"
       >
         <template slot-scope="{ row }">
-          <el-button type="text" icon="el-icon-edit" />
+          <el-button type="text" icon="el-icon-plus" @click="handleAddChild(row)" />
+          <el-button type="text" icon="el-icon-edit" @click="handleEdit(row)" />
           <el-button type="text" icon="el-icon-delete" style="color: red" @click="handleDelete(row)" />
         </template>
       </el-table-column>
     </el-table>
+    <detail :form-item="formItem" :select-tree-data="selectTreeData" :is-edit="isEdit" :visible="visible" @close-dialogStatus="close_dialog" />
   </div>
 </template>
 
 <script>
 import { getMenus, deleteMenu } from '../../../api/menu'
 import { listConvertTree } from '../../../utils/util'
+import Detail from './components/Detail'
 
 export default {
   name: 'List',
+  components: { Detail },
   data() {
     return {
-      list: []
+      list: [],
+      visible: false,
+      isEdit: true,
+      formItem: {
+        menuId: '',
+        menuCode: '',
+        menuName: '',
+        icon: 'clipboard',
+        path: '',
+        scheme: '/',
+        target: '_self',
+        status: 0,
+        parentId: '0',
+        priority: 0,
+        menuDesc: ''
+      },
+      selectTreeData: [{
+        menuId: 0,
+        menuName: '无'
+      }]
     }
   },
   created() {
@@ -56,6 +79,12 @@ export default {
     this.getList()
   },
   methods: {
+    close_dialog() {
+      this.visible = false
+    },
+    setSelectTree(data) {
+      this.selectTreeData.push(...data)
+    },
     getList() {
       getMenus().then(res => {
         const opt = {
@@ -64,6 +93,7 @@ export default {
           startPid: '0'
         }
         this.list = listConvertTree(res.data, opt)
+        this.setSelectTree(this.list)
       })
     },
     handleDelete(row) {
@@ -84,6 +114,17 @@ export default {
           }
         })
       })
+    },
+    handleEdit(row) {
+      this.formItem = Object.assign({}, row)
+      this.visible = true
+    },
+    handleAddChild(row) {
+      this.formItem = {}
+      this.formItem.parentId = row.menuId
+      this.formItem.icon = 'documentation'
+      this.isEdit = false
+      this.visible = true
     }
   }
 }

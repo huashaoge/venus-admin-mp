@@ -8,6 +8,24 @@ export function deleteMenu(menuId) {
   })
 }
 
+export function updateMenu(menu) {
+  return request({
+    url: '/menu/update',
+    method: 'post',
+    data: menu,
+    type: 'json'
+  })
+}
+
+export function addMenu(menu) {
+  return request({
+    url: '/menu/add',
+    method: 'post',
+    data: menu,
+    type: 'json'
+  })
+}
+
 export function getMenus() {
   return request({
     url: '/menu/all',
