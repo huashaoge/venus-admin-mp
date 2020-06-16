@@ -27,6 +27,7 @@ export const filterRouter = (array, access, routers) => {
         title: item.menuName,
         icon: item.icon || 'document'
       },
+      hidden: item.status !== 1,
       children: []
     }
     if (item.parentId === 0 || item.parentId === '0') {

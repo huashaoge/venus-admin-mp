@@ -123,6 +123,9 @@ export default {
   watch: {
     visible(newValue) {
       this.detailVisible = newValue
+    },
+    isEdit(newValue) {
+      this.isEdit = newValue
     }
   },
   methods: {
@@ -161,9 +164,10 @@ export default {
                 this.detailVisible = false
                 this.refresh()
               }
+            }).catch(() => {
+              this.saving = false
             })
           } else {
-            // todo 新增
             addMenu(this.formItem).then(res => {
               if (res.code === 20000) {
                 const { message } = res

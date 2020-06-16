@@ -26,14 +26,15 @@
       </el-table-column>
       <el-table-column
         label="操作"
-        width="120"
+        width="600"
         align="center"
         fixed="right"
       >
         <template slot-scope="{ row }">
-          <el-button type="text" icon="el-icon-plus" @click="handleAddChild(row)" />
-          <el-button type="text" icon="el-icon-edit" @click="handleEdit(row)" />
-          <el-button type="text" icon="el-icon-delete" style="color: red" @click="handleDelete(row)" />
+          <el-button type="primary" icon="el-icon-plus" @click="handleAddChild(row)">新增菜单</el-button>
+          <el-button type="primary" icon="el-icon-edit" @click="handleEdit(row)">编辑菜单</el-button>
+          <el-button type="danger" icon="el-icon-delete" @click="handleDelete(row)">删除菜单</el-button>
+          <el-button type="primary" icon="el-icon-setting" @click="handleAction(row)">菜单功能</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -54,6 +55,7 @@ export default {
       list: [],
       visible: false,
       isEdit: true,
+      showAction: false,
       formItem: {
         menuId: '',
         menuCode: '',
@@ -125,6 +127,13 @@ export default {
       this.formItem.icon = 'documentation'
       this.isEdit = false
       this.visible = true
+    },
+    handleAction(row) {
+      this.showAction = true
+      this.$router.push({
+        path: '/system/menus/action',
+        query: { menuId: row.menuId, menuName: row.menuName }
+      })
     }
   }
 }

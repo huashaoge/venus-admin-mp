@@ -32,3 +32,12 @@ export function getMenus() {
     method: 'get'
   })
 }
+
+export function getMenuAction(menuId) {
+  const params = { menuId: menuId }
+  return request({
+    url: '/menu/action',
+    method: 'get',
+    params
+  })
+}
