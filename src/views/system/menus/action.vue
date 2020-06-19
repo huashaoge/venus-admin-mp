@@ -21,6 +21,12 @@
             <span>{{ updateTime | timeFilter }}</span>
           </template>
         </el-table-column>
+        <el-table-column>
+          <template slot-scope="{ row }">
+            <el-button type="primary" icon="el-icon-edit" @click="editAction(row)">编辑</el-button>
+            <el-button type="danger" icon="el-icon-delete" @click="deleteAction(row)">删除</el-button>
+          </template>
+        </el-table-column>
       </el-table>
     </div>
     <div>
@@ -53,7 +59,6 @@
           </el-form-item>
           <el-form-item>
             <el-button type="primary" :loading="saving" @click="handleSubmit">保存</el-button>
-            <el-button @click="detailVisible = false">取消</el-button>
           </el-form-item>
         </el-form>
       </el-dialog>
@@ -64,7 +69,7 @@
 <script>
 import { parseTime } from '../../../utils'
 import { getMenuAction } from '../../../api/menu'
-import { addAction } from '../../../api/action'
+import { addAction, deleteAction, updateAction } from '../../../api/action'
 export default {
   name: 'Action',
   filters: {
@@ -90,6 +95,7 @@ export default {
       detailVisible: false,
       menuName: '',
       saving: false,
+      isEdit: false,
       actionItem: {
         actionId: '',
         actionCode: '',
@@ -113,19 +119,76 @@ export default {
     this.getMenuAction()
   },
   methods: {
+    deleteAction(row) {
+      this.$confirm('此操作将永久删除该目录，是否继续？ ', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteAction(row.actionId).then(res => {
+          if (res.code === 20000) {
+            this.$notify({
+              title: '成功',
+              message: res.message || '删除成功',
+              type: 'success',
+              duration: 2000
+            })
+            this.getMenuAction()
+          }
+        })
+      })
+    },
     closeDialog() {
       this.$emit('close-dialogStatus', true)
+      this.setDefault()
     },
     addAction() {
-      console.log('addAction')
       this.detailVisible = true
+    },
+    editAction(row) {
+      this.actionItem = Object.assign({}, row)
+      this.detailVisible = true
+      this.isEdit = true
+    },
+    setDefault() {
+      const newData = {
+        actionId: '',
+        actionCode: '',
+        actionName: '',
+        status: 1,
+        priority: 0,
+        actionDesc: ''
+      }
+      this.actionItem = newData
+      this.actionItem.menuId = this.$route.query.menuId
+      this.$refs.actionForm.resetFields()
+      this.isEdit = false
+      this.saving = false
+      this.detailVisible = false
     },
     handleSubmit() {
       this.$refs['actionForm'].validate((valid) => {
         if (valid) {
           this.saving = true
           if (this.isEdit) {
-            // 修改 todo
+            // 修改
+            updateAction(this.actionItem).then(res => {
+              if (res.code === 20000) {
+                const { message } = res
+                this.$notify({
+                  title: '操作成功',
+                  message: message,
+                  type: 'success',
+                  duration: 2000
+                })
+                this.saving = false
+                this.detailVisible = false
+                this.getMenuAction()
+                this.setDefault()
+              }
+            }).catch(() => {
+              this.saving = false
+            })
           } else {
             addAction(this.actionItem).then(res => {
               if (res.code === 20000) {
@@ -139,7 +202,10 @@ export default {
                 this.saving = false
                 this.detailVisible = false
                 this.getMenuAction()
+                this.setDefault()
               }
+            }).catch(() => {
+              this.saving = false
             })
           }
         }

@@ -31,10 +31,10 @@
         fixed="right"
       >
         <template slot-scope="{ row }">
-          <el-button type="primary" icon="el-icon-plus" @click="handleAddChild(row)">新增菜单</el-button>
-          <el-button type="primary" icon="el-icon-edit" @click="handleEdit(row)">编辑菜单</el-button>
-          <el-button type="danger" icon="el-icon-delete" @click="handleDelete(row)">删除菜单</el-button>
-          <el-button type="primary" icon="el-icon-setting" @click="handleAction(row)">菜单功能</el-button>
+          <el-button type="primary" icon="el-icon-plus" :disabled="hasAuthority('systemMenuAdd')?false:true" @click="handleAddChild(row)">新增</el-button>
+          <el-button type="primary" icon="el-icon-edit" :disabled="hasAuthority('systemMenuEdit')?false:true" @click="handleEdit(row)">编辑</el-button>
+          <el-button type="danger" icon="el-icon-delete" :disabled="hasAuthority('systemMenuDel')?false:true" @click="handleDelete(row)">删除</el-button>
+          <el-button type="primary" icon="el-icon-setting" :disabled="hasAuthority('systemMenuAction')?false:true" @click="handleAction(row)">功能</el-button>
         </template>
       </el-table-column>
     </el-table>
