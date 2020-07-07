@@ -1,38 +1,59 @@
 import request from '@/utils/request'
 
-export function getRoutes() {
+export function getRoles({ page, limit, roleCode, roleName }) {
+  const params = { page: page, limit: limit, roleCode: roleCode, roleName: roleName }
   return request({
-    url: '/routes',
-    method: 'get'
-  })
-}
-
-export function getRoles() {
-  return request({
-    url: '/roles',
+    url: '/role',
+    params,
     method: 'get'
   })
 }
 
 export function addRole(data) {
   return request({
-    url: '/role',
+    url: '/role/add',
     method: 'post',
+    type: 'json',
     data
   })
 }
 
-export function updateRole(id, data) {
+export function updateRole(data) {
   return request({
-    url: `/role/${id}`,
-    method: 'put',
-    data
+    url: '/role/update',
+    method: 'post',
+    data,
+    type: 'json'
   })
 }
 
-export function deleteRole(id) {
+export function deleteRole(roleId) {
   return request({
-    url: `/role/${id}`,
-    method: 'delete'
+    url: `/role/delete`,
+    method: 'post',
+    data: { roleId }
+  })
+}
+
+export function getRoleUsers(roleId) {
+  const params = {
+    roleId: roleId
+  }
+  return request({
+    url: '/role/users',
+    method: 'get',
+    params
+  })
+}
+
+export function addRoleUsers({ roleId, userIds }) {
+  const data = {
+    roleId: roleId,
+    userIds: userIds.join(',')
+  }
+  return request({
+    url: '/role/users/add',
+    data,
+    method: 'post'
   })
 }

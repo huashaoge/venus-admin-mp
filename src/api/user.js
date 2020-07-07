@@ -32,3 +32,27 @@ export function logout(token) {
     data: { token: token }
   })
 }
+
+export function getUsers(params) {
+  return request({
+    url: '/user',
+    params,
+    method: 'get'
+  })
+}
+
+export function getAllUsers() {
+  return request({
+    url: '/user/all',
+    method: 'get'
+  })
+}
+
+export function addUser(data) {
+  return request({
+    url: '/user/add',
+    data,
+    type: 'json',
+    method: 'post'
+  })
+}

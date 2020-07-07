@@ -10,6 +10,7 @@ import './styles/element-variables.scss'
 import '@/styles/index.scss' // global css
 
 import '@riophae/vue-treeselect/dist/vue-treeselect.css' // 样式文件
+import TreeTable from 'tree-table-vue'
 import Treeselect from '@riophae/vue-treeselect'
 
 import App from './App'
@@ -41,6 +42,7 @@ Vue.use(Element, {
 
 // 注册组件
 Vue.component('treeselect', Treeselect)
+Vue.component(TreeTable.name, TreeTable)
 
 Vue.prototype.hasAuthority = function(authorities) {
   if (!authorities) {

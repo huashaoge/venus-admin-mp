@@ -85,7 +85,7 @@ export default {
       this.visible = false
     },
     setSelectTree(data) {
-      this.selectTreeData.push(...data)
+      this.selectTreeData = data
     },
     getList() {
       getMenus().then(res => {
