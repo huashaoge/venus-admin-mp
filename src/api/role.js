@@ -57,3 +57,10 @@ export function addRoleUsers({ roleId, userIds }) {
     method: 'post'
   })
 }
+
+export function getAllRoles() {
+  return request({
+    url: '/role/all',
+    method: 'get'
+  })
+}

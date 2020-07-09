@@ -101,9 +101,9 @@
           <el-input v-model="formItem.nickName" placeholder="请输入内容" />
         </el-form-item>
         <el-form-item prop="userName" label="登录名">
-          <el-input v-model="formItem.userName" placeholder="请输入内容" />
+          <el-input v-model="formItem.userName" :disabled="formItem.userId?true:false" placeholder="请输入内容" />
         </el-form-item>
-        <el-form-item prop="password" label="登录密码">
+        <el-form-item v-if="formItem.userId?false:true" prop="password" label="登录密码">
           <el-input v-model="formItem.password" type="password" placeholder="请输入内容" />
         </el-form-item>
         <el-form-item v-if="formItem.userId?false:true" prop="passwordConfirm" label="再次确定密码">
@@ -126,6 +126,73 @@
           <el-input v-model="formItem.roleDesc" type="textarea" :rows="3" placeholder="请输入内容" />
         </el-form-item>
       </el-form>
+      <el-form v-show="current == 'form2'" ref="form2" :model="formItem" :rules="formItemRules" label-width="80px" label-position="right">
+        <el-table
+          ref="multipleTable"
+          :key="tableKey"
+          :data="selectRoles"
+          border
+          fit
+          highlight-current-row
+          style="width: 100%;"
+          @selection-change="handleSelectionChange"
+        >
+          <el-table-column
+            type="selection"
+            width="55"
+          />
+          <el-table-column
+            prop="roleName"
+            label="角色名称"
+          />
+          <el-table-column
+            prop="roleDesc"
+            label="描述"
+            width="300"
+          />
+        </el-table>
+      </el-form>
+      <el-form v-show="current == 'form3'" ref="form3" :model="formItem" :rules="formItemRules" label-width="80px" label-position="right">
+        <el-form-item prop="expireTime" label="过期时间(选填)">
+          <el-date-picker
+            v-model="formItem.expireTime"
+            type="datetime"
+            placeholder="设置有效期"
+          />
+        </el-form-item>
+        <el-form-item prop="grantMenus" label="功能菜单(选填)">
+          <tree-table
+            ref="tree"
+            style="max-height:500px;overflow: auto"
+            expand-key="menuName"
+            :expand-type="false"
+            :is-fold="false"
+            :tree-type="true"
+            :selectable="true"
+            :columns="columns2"
+            :data="selectMenus"
+          >
+            <template slot="operation" slot-scope="scope">
+              <el-checkbox-group v-model="formItem.grantActions">
+                <el-checkbox v-for="item in scope.row.actionList" :key="item.authorityId" :label="item.authorityId">
+                  <span :title="item.actionDesc">{{ item.actionName }}</span>
+                </el-checkbox>
+              </el-checkbox-group>
+            </template>
+          </tree-table>
+        </el-form-item>
+      </el-form>
+      <el-form v-show="current == 'form4'" ref="form4" :model="formItem" :rules="formItemRules" label-width="80px" label-position="right">
+        <el-form-item prop="userName" label="登录名">
+          <el-input v-model="formItem.userName" :disabled="formItem.userId?true:false" placeholder="请输入内容" />
+        </el-form-item>
+        <el-form-item prop="password" label="登录密码">
+          <el-input v-model="formItem.password" type="password" placeholder="请输入内容" />
+        </el-form-item>
+        <el-form-item prop="passwordConfirm" label="再次确定密码">
+          <el-input v-model="formItem.passwordConfirm" type="password" placeholder="请输入内容" />
+        </el-form-item>
+      </el-form>
       <div slot="footer">
         <el-button type="primary" :loading="saving" size="mini" @click="handleSubmit">保存</el-button>
         <el-button type="default" size="mini" @click="closeDialog">取消</el-button>
@@ -137,7 +204,10 @@
 <script>
 import Pagination from '../../../components/Pagination/index'
 import { parseTime } from '../../../utils'
-import { getUsers, addUser } from '../../../api/user'
+import { getAllRoles } from '../../../api/role'
+import { getUsers, addUser, updateUser, getUserRoles, addUserRoles, updatePassword } from '../../../api/user'
+import { getAuthorityMenu, getAuthorityUser, grantAuthorityUser } from '../../../api/authority'
+import { listConvertTree } from '../../../utils/util'
 export default {
   name: 'User',
   components: { Pagination },
@@ -149,13 +219,13 @@ export default {
   data() {
     const validateEn = (rule, value, callback) => {
       const reg = /^[_a-zA-Z0-9]+$/
-      const reg2 = /^.{6,18}$/
+      const reg2 = /^.{4,18}$/
       if (value === '') {
         callback(new Error('登录名不能为空'))
       } else if (value !== '' && !reg.test(value)) {
         callback(new Error('只允许字母、数字、下划线'))
       } else if (value !== '' && !reg2.test(value)) {
-        callback(new Error('长度6到18个字符'))
+        callback(new Error('长度4到18个字符'))
       } else {
         callback()
       }
@@ -235,6 +305,21 @@ export default {
           { validator: validateMobile, trigger: 'blur' }
         ]
       },
+      selectRoles: [],
+      selectMenus: [],
+      columns2: [
+        {
+          title: '菜单',
+          key: 'menuName',
+          minWidth: '250px'
+        },
+        {
+          title: '功能',
+          type: 'template',
+          template: 'operation',
+          minWidth: '200px'
+        }
+      ],
       formItem: {
         userId: '',
         userName: '',
@@ -262,6 +347,23 @@ export default {
     this.handleSearch()
   },
   methods: {
+    handleClick(command, row) {
+      switch (command) {
+        case 'grantMenu':
+          this.handleModal(row, this.forms[2])
+          break
+        case 'updatePassword':
+          this.handleModal(row, this.forms[3])
+          break
+      }
+    },
+    handleSelectionChange(vals) {
+      const result = []
+      vals.map(item => {
+        result.push(item.roleId)
+      })
+      this.formItem.grantRoles = result
+    },
     handleSubmit() {
       if (this.current === this.forms[0]) {
         this.$refs[this.current].validate((valid) => {
@@ -269,6 +371,22 @@ export default {
             this.saving = true
             if (this.formItem.userId) {
               // 更新
+              console.log('formItem:' + JSON.stringify(this.formItem))
+              updateUser(this.formItem).then(res => {
+                if (res.code === 20000) {
+                  const { message } = res
+                  this.$notify({
+                    title: '操作成功',
+                    message: message,
+                    type: 'success',
+                    duration: 2000
+                  })
+                  this.closeDialog()
+                }
+                this.handleSearch()
+              }).finally(() => {
+                this.saving = false
+              })
             } else {
               addUser(this.formItem).then((res) => {
                 if (res.code === 20000) {
@@ -289,6 +407,88 @@ export default {
           }
         })
       }
+      if (this.current === this.forms[1] && this.formItem.userId) {
+        this.$refs[this.current].validate((valid) => {
+          if (valid) {
+            this.saving = true
+            console.log('formItem111:' + JSON.stringify(this.formItem))
+            addUserRoles({
+              userId: this.formItem.userId,
+              grantRoles: this.formItem.grantRoles
+            }).then(res => {
+              if (res.code === 20000) {
+                const { message } = res
+                this.$notify({
+                  title: '操作成功',
+                  message: message,
+                  type: 'success',
+                  duration: 2000
+                })
+                this.closeDialog()
+              }
+              this.handleSearch()
+            }).finally(() => {
+              this.saving = false
+            })
+          }
+        })
+      }
+      if (this.current === this.forms[2] && this.formItem.userId) {
+        this.$refs[this.current].validate((valid) => {
+          if (valid) {
+            const authorityIds = this.getCheckedAuthorities()
+            this.saving = true
+            grantAuthorityUser({
+              userId: this.formItem.userId,
+              expireTime: this.formItem.expireTime ? this.formItem.expireTime.pattern('yyyy-MM-dd HH:mm:ss') : '',
+              authorityIds: authorityIds
+            }).then(res => {
+              if (res.code === 20000) {
+                const { message } = res
+                this.$notify({
+                  title: '授权成功',
+                  message: message,
+                  type: 'success',
+                  duration: 2000
+                })
+                this.closeDialog()
+              }
+              this.handleSearch()
+            }).finally(() => {
+              this.saving = false
+            })
+          }
+        })
+      }
+      if (this.current === this.forms[3] && this.formItem.userId) {
+        this.$refs[this.current].validate((valid) => {
+          if (valid) {
+            this.saving = true
+            updatePassword({
+              userId: this.formItem.userId,
+              password: this.formItem.password
+            }).then(res => {
+              if (res.code === 20000) {
+                const { message } = res
+                this.$notify({
+                  title: '修改成功',
+                  message: message,
+                  type: 'success',
+                  duration: 2000
+                })
+                this.closeDialog()
+              }
+              this.handleSearch()
+            }).finally(() => {
+              this.saving = false
+            })
+          }
+        })
+      }
+    },
+    getCheckedAuthorities() {
+      const menus = this.$refs['tree'].getCheckedProp('authorityId')
+      return menus.concat(this.formItem.grantActions)
     },
     handleModal(data, form) {
       if (data) {
@@ -301,7 +501,79 @@ export default {
         this.modalTitle = data ? '编辑用户 - ' + data.userName : '添加用户'
         this.modalVisible = true
       }
+      if (form === this.forms[1]) {
+        this.modalTitle = data ? '分配角色 - ' + data.userName : '分配角色'
+        this.handleLoadRoles(this.formItem.userId)
+      }
+      if (form === this.forms[2]) {
+        this.modalTitle = data ? '分配私人菜单 - ' + data.userName : '分配角色'
+        this.handleLoadUserGranted(this.formItem.userId)
+      }
+      if (form === this.forms[3]) {
+        this.modalTitle = data ? '修改密码 - ' + data.userName : '修改密码'
+        this.modalVisible = true
+      }
       this.current = form
+    },
+    handleLoadUserGranted(userId) {
+      const that = this
+      const p1 = getAuthorityMenu()
+      const p2 = getAuthorityUser(userId)
+      Promise.all([p1, p2]).then(function(values) {
+        const res1 = values[0]
+        const res2 = values[1]
+        if (res1.code === 20000 && res1.data) {
+          const opt = {
+            primaryKey: 'menuId',
+            parentKey: 'parentId',
+            startPid: '0'
+          }
+          if (res2.code === 20000 && res2.data && res2.data.length > 0) {
+            res2.data.map(item => {
+              if (item.authority.indexOf('MENU_') !== -1) {
+                that.formItem.grantMenus.push(item.authorityId)
+              }
+              if (item.authority.indexOf('ACTION_') !== -1) {
+                that.formItem.grantActions.push(item.authorityId)
+              }
+            })
+            that.formItem.expireTime = res2.data[0].expireTime
+            that.formItem.isExpired = res2.data[0].isExpired
+          }
+          res1.data.map(item => {
+            if (that.formItem.grantMenus.includes(item.authorityId)) {
+              item._isChecked = true
+            }
+          })
+          that.selectMenus = listConvertTree(res1.data, opt)
+        }
+        that.modalVisible = true
+      })
+    },
+    handleLoadRoles(userId) {
+      if (!userId) {
+        return
+      }
+      const that = this
+      const p1 = getAllRoles()
+      const p2 = getUserRoles(userId)
+      Promise.all([p1, p2]).then(values => {
+        const res1 = values[0]
+        const res2 = values[1]
+        if (res1.code === 20000) {
+          that.selectRoles = res1.data
+        }
+        if (res2.code === 20000) {
+          res2.data.map(item => {
+            this.$nextTick(() => {
+              this.$refs.multipleTable.toggleRowSelection(that.selectRoles[that.selectRoles.findIndex((it, index, arr) => {
+                return it.roleId === item.roleId
+              })], true)
+            })
+          })
+        }
+        that.modalVisible = true
+      })
     },
     handleResetForm(form) {
       this.$refs[form].resetFields()
@@ -327,10 +599,9 @@ export default {
         isExpired: false
       }
       this.formItem = newData
-      // this.forms.map(form => {
-      //   this.handleResetForm(form)
-      // })
-      this.handleResetForm('form1')
+      this.forms.map(form => {
+        this.handleResetForm(form)
+      })
       this.current = this.forms[0]
       this.formItem.grantMenus = []
       this.formItem.grantActions = []

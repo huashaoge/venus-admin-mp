@@ -56,3 +56,41 @@ export function addUser(data) {
     method: 'post'
   })
 }
+
+export function updateUser(data) {
+  return request({
+    url: '/user/update',
+    data,
+    type: 'json',
+    method: 'post'
+  })
+}
+
+export function updatePassword({ userId, password }) {
+  const data = {
+    userId: userId,
+    password: password
+  }
+  return request({
+    url: '/user/update/password',
+    data,
+    method: 'post'
+  })
+}
+
+export function getUserRoles(userId) {
+  return request({
+    url: '/user/roles',
+    method: 'get',
+    params: { userId }
+  })
+}
+
+export function addUserRoles({ userId, grantRoles }) {
+  const data = { userId: userId, roleIds: grantRoles.join(',') }
+  return request({
+    url: '/user/roles/add',
+    data,
+    method: 'post'
+  })
+}

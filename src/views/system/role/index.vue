@@ -102,7 +102,7 @@
       </el-form>
       <!--分配权限-->
       <el-form v-show="current == 'form2'" ref="form2" :model="formItem" :rules="formItemRules" label-width="80px" label-position="right">
-        <el-form-item prop="roleName" label="过期时间(选填)">
+        <el-form-item prop="expireTime" label="过期时间(选填)">
           <el-date-picker
             v-model="formItem.expireTime"
             type="datetime"

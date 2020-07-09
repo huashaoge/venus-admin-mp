@@ -10,6 +10,30 @@ export function getAuthorityMenu() {
   })
 }
 
+export function grantAuthorityUser({ userId, expireTime, authorityIds }) {
+  const data = {
+    userId: userId,
+    expireTime: expireTime,
+    authorityIds: authorityIds.join(',')
+  }
+  return request({
+    url: '/authority/user/grant',
+    data,
+    method: 'post'
+  })
+}
+
+export function getAuthorityUser(userId) {
+  const params = {
+    userId: userId
+  }
+  return request({
+    url: '/authority/user',
+    params,
+    method: 'get'
+  })
+}
+
 export function getAuthorityRole(roleId) {
   const params = {
     roleId: roleId
