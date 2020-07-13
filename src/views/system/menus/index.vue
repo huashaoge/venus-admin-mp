@@ -26,15 +26,14 @@
       </el-table-column>
       <el-table-column
         label="操作"
-        width="600"
         align="center"
         fixed="right"
       >
         <template slot-scope="{ row }">
-          <el-button type="primary" icon="el-icon-plus" :disabled="hasAuthority('systemMenuAdd')?false:true" @click="handleAddChild(row)">新增</el-button>
-          <el-button type="primary" icon="el-icon-edit" :disabled="hasAuthority('systemMenuEdit')?false:true" @click="handleEdit(row)">编辑</el-button>
-          <el-button type="danger" icon="el-icon-delete" :disabled="hasAuthority('systemMenuDel')?false:true" @click="handleDelete(row)">删除</el-button>
-          <el-button type="primary" icon="el-icon-setting" :disabled="hasAuthority('systemMenuAction')?false:true" @click="handleAction(row)">功能</el-button>
+          <el-link type="primary" icon="el-icon-plus" :disabled="hasAuthority('systemMenuAdd')?false:true" @click="handleAddChild(row)">新增</el-link>
+          <el-link type="primary" icon="el-icon-edit" :disabled="hasAuthority('systemMenuEdit')?false:true" @click="handleEdit(row)">编辑</el-link>
+          <el-link type="danger" icon="el-icon-delete" :disabled="hasAuthority('systemMenuDel')?false:true" @click="handleDelete(row)">删除</el-link>
+          <el-link type="primary" icon="el-icon-setting" :disabled="hasAuthority('systemMenuAction')?false:true" @click="handleAction(row)">功能</el-link>
         </template>
       </el-table-column>
     </el-table>

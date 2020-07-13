@@ -1,7 +1,7 @@
 <template>
   <div style="padding: 32px">
     <div style="padding-bottom: 10px">
-      <el-button type="primary" icon="el-icon-plus" @click="addAction">新增</el-button>
+      <el-button type="primary" size="mini" icon="el-icon-plus" @click="addAction">新增</el-button>
     </div>
     <div>
       <el-table
@@ -23,8 +23,8 @@
         </el-table-column>
         <el-table-column>
           <template slot-scope="{ row }">
-            <el-button type="primary" icon="el-icon-edit" @click="editAction(row)">编辑</el-button>
-            <el-button type="danger" icon="el-icon-delete" @click="deleteAction(row)">删除</el-button>
+            <el-button type="primary" size="mini" icon="el-icon-edit" @click="editAction(row)">编辑</el-button>
+            <el-button type="danger" size="mini" icon="el-icon-delete" @click="deleteAction(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>

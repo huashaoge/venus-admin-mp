@@ -12,12 +12,12 @@
           <el-input v-model="pageInfo.email" placeholder="请输入关键字" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" size="mini" @click="handleSearch(1)">查询</el-button>
+          <el-button type="primary" size="mini" :disabled="hasAuthority('systemUserSearch')?false:true" @click="handleSearch(1)">查询</el-button>
         </el-form-item>
       </el-form>
       <div style="padding: 0 0 10px 0;">
         <el-button-group>
-          <el-button type="primary" icon="el-icon-plus" size="mini" @click="handleModal()"><span>添加</span></el-button>
+          <el-button type="primary" icon="el-icon-plus" size="mini" :disabled="hasAuthority('systemUserAdd')?false:true" @click="handleModal()"><span>添加</span></el-button>
         </el-button-group>
       </div>
       <el-table
@@ -68,15 +68,15 @@
         </el-table-column>
         <el-table-column fixed="right" label="操作" align="center">
           <template slot-scope="{ row }">
-            <el-link type="primary" @click="handleModal(row)">编辑</el-link>
-            <el-link type="primary" @click="handleModal(row, forms[1])">分配角色</el-link>
+            <el-link type="primary" :disabled="hasAuthority('systemUserEdit')?false:true" @click="handleModal(row)">编辑</el-link>
+            <el-link type="primary" :disabled="hasAuthority('systemUserGrantRolesEdit')?false:true" @click="handleModal(row, forms[1])">分配角色</el-link>
             <el-dropdown trigger="click" @command="handleClick($event,row)">
               <span>
                 <el-link type="primary">更多<i class="el-icon-arrow-down" /></el-link>
               </span>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item command="grantMenu" style="color: #1890ff">分配私人菜单</el-dropdown-item>
-                <el-dropdown-item command="updatePassword" style="color: #1890ff">修改密码</el-dropdown-item>
+                <el-dropdown-item :disabled="hasAuthority('systemUserGrantMenusEdit')?false:true" command="grantMenu" style="color: #1890ff">分配私人菜单</el-dropdown-item>
+                <el-dropdown-item :disabled="hasAuthority('systemUserPasswordEdit')?false:true" command="updatePassword" style="color: #1890ff">修改密码</el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
           </template>
